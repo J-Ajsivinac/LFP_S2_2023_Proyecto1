@@ -20,7 +20,7 @@ class App(tk.Tk):
         style = ttk.Style()
         style.configure("TButton", font=("Montserrat", 12))
         style.configure("TLabel", font=("Montserrat", 12))
-
+        self.configure(bg="#111111")
         # style.configure("TText", ))
         self.mainloop()
 
@@ -28,6 +28,7 @@ class App(tk.Tk):
 class Contendio(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
         self.pack(padx=40, pady=10, fill="x", side="top")
         style = ttk.Style()
         style.configure("My.TFrame", background="yellow")
@@ -37,8 +38,9 @@ class Contendio(ttk.Frame):
         self.crear_text()
 
     def crear_menu_superior(self):
-        panel_superior = ttk.Frame()
-        panel_superior.pack(padx=0, pady=1, fill="x", side="top")
+        panel_superior = tk.Frame()
+        panel_superior.pack(padx=7, pady=1, fill="x", side="top")
+        panel_superior.configure(bg="#111111")
         img = Image.open(Imagenes.BTN_SCANNER)
         img = img.resize((20, 18), Image.LANCZOS)
         self.img = ImageTk.PhotoImage(img)
@@ -62,13 +64,10 @@ class Contendio(ttk.Frame):
         button_sub_menu = tk.Menu(
             menu_button, tearoff=False, relief=tk.FLAT, bd=0, font=("Montserrat", 12)
         )
-        button_sub_menu.add_command(
-            label="Abrir",
-            command=self.on_button_click,
-        )
-        button_sub_menu.add_checkbutton(label="Guardar")
-        button_sub_menu.add_checkbutton(label="Guardar Como")
-        button_sub_menu.add_checkbutton(label="Salir")
+        button_sub_menu.add_command(label="Abrir", command=self.on_button_click)
+        button_sub_menu.add_command(label="Guardar")
+        button_sub_menu.add_command(label="Guardar Como")
+        button_sub_menu.add_command(label="Salir", command=self.parent.destroy)
 
         menu_button["menu"] = button_sub_menu
 
@@ -113,7 +112,7 @@ class Contendio(ttk.Frame):
 
     def crear_text(self):
         panel = ttk.Frame()
-        panel.pack(padx=40, pady=10, fill="both", expand=True)
+        panel.pack(padx=40, pady=14, fill="both", expand=True)
         self.hscrollbar = ttk.Scrollbar(panel, orient=tk.HORIZONTAL)
         self.vscrollbar = ttk.Scrollbar(panel, orient=tk.VERTICAL)
         style = ttk.Style()
@@ -126,6 +125,7 @@ class Contendio(ttk.Frame):
             font=("Cascadia Code", 12),
             yscrollcommand=self.vscrollbar.set,
             xscrollcommand=self.hscrollbar.set,
+            background="#252525",
         )
         self.text_area.bind("<Tab>", self.insert_tab)
         self.text_area.tag_configure("tab", tabs=("2c",))
