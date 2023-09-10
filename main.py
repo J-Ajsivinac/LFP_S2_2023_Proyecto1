@@ -3,13 +3,16 @@ from tkinter import ttk
 from img.iconos import Imagenes
 import sv_ttk
 from PIL import Image, ImageTk
-from modules.lectura import load_json
+from modules import lectura, analizador
 from tabla import Ventana2
+
+tokens_totales = []
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+
         self.title("Ventana Principal")
         self.geometry("1066x600")
 
@@ -65,7 +68,7 @@ class Contendio(ttk.Frame):
         button_sub_menu = tk.Menu(
             menu_button, tearoff=False, relief=tk.FLAT, bd=0, font=("Montserrat", 12)
         )
-        button_sub_menu.add_command(label="Abrir", command=self.on_button_click)
+        button_sub_menu.add_command(label="Abrir", command=self.cargar_datos)
         button_sub_menu.add_command(label="Guardar")
         button_sub_menu.add_command(label="Guardar Como")
         button_sub_menu.add_command(label="Salir", command=self.parent.destroy)
@@ -105,8 +108,17 @@ class Contendio(ttk.Frame):
         btn_2.grid(row=0, column=2, columnspan=1)
         btn_3.grid(row=0, column=3, columnspan=1)
 
-    def on_button_click(self):
-        load_json(self.text_area)
+    def cargar_datos(self):
+        lectura.cargar_json(self.text_area)
+
+    def analizar_datos(self):
+        texto = self.text_area.get("1.0", "end")
+        # print(texto)
+        analizar = analizador.Analizador()
+        analizar.leer_instrucciones(texto)
+        # print(analizar.tokens)
+        return analizar.tokens
+        # print(tokens_totales)
 
     def insert_tab(self, event):
         self.text_area.insert(tk.INSERT, "    ")
@@ -138,7 +150,8 @@ class Contendio(ttk.Frame):
         self.text_area.pack(expand=True, fill="both")
 
     def abrir_ventana(self):
-        Ventana2()
+        tokens_totales = self.analizar_datos()
+        Ventana2(tokens_totales)
 
 
 if __name__ == "__main__":

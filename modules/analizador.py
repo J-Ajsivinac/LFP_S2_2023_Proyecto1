@@ -1,4 +1,4 @@
-from Abstract.token import Token, TipoToken
+from modules.Abstract.token import Token, TipoToken
 import re
 import math
 
@@ -535,14 +535,7 @@ class Analizador:
             print(i)
 
 
-text = ""
-with open(
-    "C:\\Users\\mesoi\\Documents\\1U^NI6VxExD@D\\2023\\2. SEGUNDO SEMESTRE\\LFP\\Lab\\Proyecto 1\\entrada.json",
-    "r",
-) as json_file:
-    text = json_file.read()
-
-analizado = Analizador()
-analizado.leer_instrucciones(text)
-analizado.imprimir()
-analizado.iniciar()
+# analizado = Analizador()
+# analizado.leer_instrucciones(text)
+# analizado.imprimir()
+# analizado.iniciar()

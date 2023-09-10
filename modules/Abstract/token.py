@@ -1,4 +1,4 @@
-from Abstract.abstract import Expression
+from modules.Abstract.abstract import Expression
 from enum import Enum
 
 

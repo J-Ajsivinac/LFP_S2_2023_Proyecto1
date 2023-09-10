@@ -2,7 +2,7 @@ from tkinter import filedialog
 import json
 
 
-def load_json(text_widget):
+def cargar_json(text_widget):
     file_path = filedialog.askopenfilename(filetypes=[("Archivos JSON", "*.json")])
     if file_path:
         with open(file_path, "r") as json_file:
