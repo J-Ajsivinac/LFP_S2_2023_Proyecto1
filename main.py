@@ -4,6 +4,7 @@ from img.iconos import Imagenes
 import sv_ttk
 from PIL import Image, ImageTk
 from modules.lectura import load_json
+from tabla import Ventana2
 
 
 class App(tk.Tk):
@@ -77,6 +78,7 @@ class Contendio(ttk.Frame):
             text="  Analizar",
             compound="left",
             width=7,
+            command=self.abrir_ventana,
         )
         btn_1.grid_configure(padx=0)
 
@@ -134,6 +136,9 @@ class Contendio(ttk.Frame):
         self.vscrollbar.config(command=self.text_area.yview)
         self.vscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.text_area.pack(expand=True, fill="both")
+
+    def abrir_ventana(self):
+        Ventana2()
 
 
 if __name__ == "__main__":

@@ -40,6 +40,9 @@ class TipoToken(Enum):
     O_MOD = 19
     PALABRA_CLAVE = 20
     O_OPERACION = 21
+    ERROR = 22
+    OPERACIONES = 23
+    CONFIGURACIONES = 24
 
 
 class Estados(Enum):
