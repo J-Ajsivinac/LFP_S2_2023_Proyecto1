@@ -13,3 +13,5 @@ def cargar_json(text_widget):
             text_widget.insert(
                 "1.0", json_content
             )  # Inserta el contenido JSON en el widget Text
+            return file_path
+    return None
