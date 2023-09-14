@@ -3,10 +3,10 @@ from tkinter import ttk, messagebox
 from img.iconos import Imagenes
 import sv_ttk
 from PIL import Image, ImageTk
-from modules import lectura, analizador
+from modules import lectura, analizador, instrucciones
 from tabla import Ventana2
-
-tokens_totales = []
+import copy
+import json
 
 
 class App(tk.Tk):
@@ -39,7 +39,8 @@ class Contendio(ttk.Frame):
         self.style = ttk.Style()
         self.style.configure("My.TFrame", background="yellow")
         self.config(style="My.TFrame")
-
+        self.errores = []
+        self.tokens_totales = []
         self.crear_menu_superior()
         self.crear_text()
         self.archivo_actual = None
@@ -101,6 +102,7 @@ class Contendio(ttk.Frame):
             compound="left",
             width=7,
             style="TButton1.TButton",
+            command=self.crear_archivo_error,
         )
         btn_3 = ttk.Button(
             panel_superior,
@@ -109,6 +111,7 @@ class Contendio(ttk.Frame):
             compound="left",
             width=7,
             style="TButton1.TButton",
+            command=self.crear_reporte,
         )
 
         panel_superior.columnconfigure((0, 1, 2, 3), uniform="a", pad=10)
@@ -131,7 +134,8 @@ class Contendio(ttk.Frame):
         analizar = analizador.Analizador()
         analizar.leer_instrucciones(texto)
         # print(analizar.tokens)
-        return analizar.tokens
+        self.errores = copy.deepcopy(analizar.errores)
+        self.tokens_totales = copy.deepcopy(analizar.tokens)
         # print(tokens_totales)
 
     def insert_tab(self, event):
@@ -193,10 +197,31 @@ class Contendio(ttk.Frame):
         self.text_area.pack(expand=True, fill="both")
         self.text_area.bind("<KeyRelease>", self.actualizar_contador)
 
+    def crear_archivo_error(self):
+        json_error = {"errores": []}
+        for error in self.errores:
+            error_dict = {
+                "No": error.numero,
+                "descripcion": {
+                    "lexema": error.lexema,
+                    "tipo": error.tipo,
+                    "columna": error.columna,
+                    "fila": error.fila,
+                },
+            }
+            json_error["errores"].append(error_dict)
+        json_data = json.dumps(json_error, indent=4, ensure_ascii=False)
+        with open("errores.json", "w", encoding="utf-8") as json_file:
+            json_file.write(json_data)
+
+    def crear_reporte(self):
+        i = instrucciones.Instrucciones(self.tokens_totales, "test")
+        i.iniciar()
+
     def abrir_ventana(self):
-        tokens_totales = self.analizar_datos()
-        if tokens_totales:
-            Ventana2(tokens_totales)
+        self.analizar_datos()
+        if self.tokens_totales:
+            Ventana2(self.tokens_totales)
 
     def guardar_como(self):
         archivo = tk.filedialog.asksaveasfile(
@@ -210,7 +235,7 @@ class Contendio(ttk.Frame):
 
     def guardar(self):
         if self.archivo_actual:
-            with open(self.archivo_actual, "w", encoding="utf-8") as archivo:
+            with open(self.archivo_actual, "w", encoding="UTF-8") as archivo:
                 contenido = self.text_area.get("1.0", tk.END)
                 archivo.write(contenido)
         else:

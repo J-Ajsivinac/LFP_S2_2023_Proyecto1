@@ -1,7 +1,6 @@
 from modules.Abstract.token import Token, TipoToken
 from modules.Abstract.error import Error
 import re
-import math
 
 
 class Analizador:
@@ -418,8 +417,8 @@ class Analizador:
     def imprimir(self):
         for lexema in self.tokens:
             print(f"{lexema.valor}---{lexema.columna}")
-        for error in self.errores["errores"]:
-            print(error)
+        # for error in self.errores["errores"]:
+        #     print(error)
 
     def crear_lexema(self, cadena):
         lexema = ""
@@ -488,80 +487,6 @@ class Analizador:
             else:
                 lexema += char
         return None, None, None, cadena[puntero:]
-
-    def operar(self):
-        valores = []
-        op = None
-        while self.tokens:
-            lexema = self.tokens.pop(0)
-            if lexema.tipo in [
-                TipoToken.O_INVERSO,
-                TipoToken.O_SENO,
-                TipoToken.O_COSENO,
-                TipoToken.O_TANGENTE,
-                TipoToken.O_SUMA,
-                TipoToken.O_RESTA,
-                TipoToken.O_MULTIPLICACION,
-                TipoToken.O_DIVISION,
-                TipoToken.O_POTENCIA,
-                TipoToken.O_RAIZ,
-                TipoToken.O_MOD,
-            ]:
-                op = lexema
-                break
-
-        while self.tokens:
-            lexema = self.tokens.pop(0)
-            if lexema.tipo == TipoToken.STRING:
-                if self.tokens[0].tipo == TipoToken.STRING:
-                    continue
-                valor = self.tokens.pop(0)
-                if valor.tipo in [TipoToken.O_OPERACION, TipoToken.LLAVE_DER]:
-                    break
-                if valor.tipo == TipoToken.LLAVE_IZQ:
-                    valores.append(self.operar())
-                else:
-                    if valor.tipo == TipoToken.NUMBER:
-                        valores.append(valor.valor)
-
-            if lexema.tipo in [TipoToken.O_OPERACION, TipoToken.LLAVE_DER]:
-                break
-        if len(valores) == 0 and len(self.tokens) == 0 and not op:
-            return None
-
-        if op.tipo == TipoToken.O_SUMA:
-            return sum(valores)
-        elif op.tipo == TipoToken.O_RESTA:
-            return valores[0] - sum(valores[1:])
-        elif op.tipo == TipoToken.O_MULTIPLICACION:
-            result = 1
-            for valor in valores:
-                result *= valor
-            return result
-        elif op.tipo == TipoToken.O_DIVISION:
-            result = valores[0]
-            for valor in valores[1:]:
-                result /= valor
-            return result
-        elif op.tipo == TipoToken.O_POTENCIA:
-            return math.pow(valores[0], valores[1])
-        elif op.tipo == TipoToken.O_SENO:
-            return math.sin(valores[0])
-        else:
-            print(f"Operación no soportada: {op}")
-        return None
-
-    def iniciar(self):
-        operacion = ""
-        while True:
-            operacion = self.operar()
-            if operacion is not None:
-                self.instrucciones.append(operacion)
-            else:
-                break
-
-        for i in self.instrucciones:
-            print(i)
 
 
 # text = ""
