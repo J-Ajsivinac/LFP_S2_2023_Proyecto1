@@ -138,12 +138,38 @@ class Contendio(ttk.Frame):
         self.text_area.insert(tk.INSERT, "    ")
         return "break"
 
+    def actualizar_contador(self, event):
+        contenido = self.text_area.get("1.0", "end-1c")
+        lineas = contenido.split("\n")
+        numero_de_lineas = "\n".join([f"{i + 1}" for i, linea in enumerate(lineas)])
+        self.contador.config(state=tk.NORMAL)
+        self.contador.delete("1.0", tk.END)
+        self.contador.insert("1.0", f"{numero_de_lineas}")
+        self.contador.config(state=tk.DISABLED)
+
+    def sync_scrollbars(self, *args):
+        # Cuando se desplaza el scrollbar, se actualizan las posiciones de los widgets Text
+        self.text_area.yview(*args)
+        self.contador.yview(*args)
+
+    def sync_text_widgets(self, *args):
+        # Cuando se desplaza uno de los widgets Text, se actualiza la posición del scrollbar y del otro widget Text
+        self.contador.yview_moveto(args[0])
+        self.vscrollbar.set(*args)
+
     def crear_text(self):
         panel = ttk.Frame()
         panel.pack(padx=40, pady=16, fill="both", expand=True)
         panel.config(style="FrameText.TFrame")
         self.hscrollbar = ttk.Scrollbar(panel, orient=tk.HORIZONTAL)
         self.vscrollbar = ttk.Scrollbar(panel, orient=tk.VERTICAL)
+        self.contador = tk.Text(
+            panel,
+            font=("Cascadia Code", 12),
+            width=5,
+            yscrollcommand=self.vscrollbar.set,
+            border=0,
+        )
 
         self.text_area = tk.Text(
             panel,
@@ -157,9 +183,15 @@ class Contendio(ttk.Frame):
         self.text_area.tag_configure("tab", tabs=("2c",))
         self.hscrollbar.config(command=self.text_area.xview)
         self.hscrollbar.pack(side=tk.BOTTOM, fill=tk.X)
-        self.vscrollbar.config(command=self.text_area.yview)
+        self.contador.pack(side=tk.LEFT, fill="y")
+
+        self.vscrollbar.config(command=self.sync_scrollbars)
+        self.text_area.config(yscrollcommand=self.sync_text_widgets)
+        self.contador.config(yscrollcommand=self.sync_text_widgets)
+
         self.vscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.text_area.pack(expand=True, fill="both")
+        self.text_area.bind("<KeyRelease>", self.actualizar_contador)
 
     def abrir_ventana(self):
         tokens_totales = self.analizar_datos()

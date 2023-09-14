@@ -1,4 +1,5 @@
 from modules.Abstract.token import Token, TipoToken
+from modules.Abstract.error import Error
 import re
 import math
 
@@ -6,14 +7,15 @@ import math
 class Analizador:
     def __init__(self):
         self.tokens = []
-        self.errores = {"errores": []}
+        self.errores = []
         self.estado = 0
         self.fila = 1
-        self.columna = 1
+        self.columna = 0
         self.instrucciones = []
         self.esoperacion = False
+        self.operaciones_switch = True
+        self.abierto = False
         self.patterns = [
-            (r"\d+\.\d+", TipoToken.NUMBER),  # Número decimal
             (
                 re.compile(
                     r"operaciones",
@@ -84,25 +86,95 @@ class Analizador:
                 ),
                 TipoToken.O_SENO,
             ),
-            (r"[{}:\[\],]", "SIMBOLO_ESPECIAL"),  # Símbolos especiales
-            (r"\s+", "ESPACIO"),
-            (r"^[a-zA-Z_][a-zA-Z0-9_]*$", TipoToken.STRING),  # Espacios en blanco
         ]
 
-    def leer_instrucciones(self, cadena, coma=False):
+    def s_0(self, caracter, cadena):
+        if caracter == "{":
+            self.estado = 1
+            self.columna += 1
+        elif caracter == ":":
+            self.estado = 2
+            self.columna += 1
+        elif caracter == "[":
+            self.estado = 3
+            self.columna += 1
+        elif caracter == '"':
+            self.estado = 4
+            self.columna += 1
+        elif caracter == "]":
+            self.estado = 6
+            self.columna += 1
+        elif caracter == ",":
+            self.estado = 7
+            self.columna += 1
+        elif caracter == "}":
+            self.estado = 8
+            self.columna += 1
+        elif not self.abierto and caracter.isalpha():
+            self.crear_error('se esperaba un " ', self.fila, self.columna)
+            cadena = self.s_5(cadena, 0)
+        else:
+            self.crear_error(caracter, self.fila, self.columna)
+            self.columna += 1
+            cadena = cadena[1:]
+            if self.esoperacion:
+                self.esoperacion = False
+        return cadena
+
+    def s_1(self):
+        self.tokens.append(Token(TipoToken.LLAVE_IZQ, "{", self.fila, self.columna))
+        self.estado = 0
+
+    def s_2(self):
+        self.tokens.append(Token(TipoToken.DOS_PUNTOS, ":", self.fila, self.columna))
+        self.estado = 0
+
+    def s_3(self):
+        self.tokens.append(Token(TipoToken.CORCHETE_IZQ, "[", self.fila, self.columna))
+        self.estado = 0
+
+    def s_4(self):
+        self.tokens.append(Token(TipoToken.COMILLA, '"', self.fila, self.columna))
+        self.estado = 0
+        self.abierto = False if self.abierto else True
+
+    def s_5(self, cadena, puntero):
+        estado, cadena, puntero = self.crear_objeto(cadena, puntero, not self.abierto)
+        if estado:
+            self.estado = estado
+        else:
+            self.estado = 9
+        return cadena
+
+    def s_6(self):
+        self.tokens.append(Token(TipoToken.LLAVE_DER, "]", self.fila, self.columna))
+        self.estado = 0
+
+    def s_7(self):
+        self.tokens.append(Token(TipoToken.COMA, ",", self.fila, self.columna))
+        self.estado = 0
+
+    def s_8(self):
+        self.tokens.append(Token(TipoToken.LLAVE_DER, "}", self.fila, self.columna))
+        self.estado = 0
+
+    def s_9(self, cadena, puntero):
+        cadena, puntero = self.dos_valores(cadena, puntero)
+        return cadena
+
+    def leer_instrucciones(self, cadena):
         puntero = 0
         self.estado = 0
 
         while cadena:
             char = cadena[puntero]
-            puntero += 1
             if char == "\t":
                 self.columna += 4
                 cadena = cadena[4:]
                 puntero = 0
                 continue
             if char == "\n":
-                self.columna = 1
+                self.columna = 0
                 self.fila += 1
                 cadena = cadena[1:]
                 puntero = 0
@@ -114,121 +186,59 @@ class Analizador:
                 continue
 
             if self.estado == 0:
-                if char == "{":
-                    cadena = cadena[1:]
-                    puntero = 0
-                    self.columna += 1
-                else:
-                    # print("se esperaba un {")
-                    self.crear_error("Se esperaba un {", self.fila, self.columna)
-                    puntero = 0
-                self.estado = 1
-
+                cadena = self.s_0(cadena[puntero], cadena)
             elif self.estado == 1:
-                if char == "}":
-                    break
-                if char == '"':
-                    _, cadena, puntero = self.crear_objeto(cadena, puntero)
-                elif char.isalpha():
-                    self.crear_error('Se esperaba un "', self.fila, self.columna)
-                    _, cadena, puntero = self.crear_objeto(cadena, puntero - 1, True)
-                else:
-                    self.columna = 1
-                    cadena = cadena[1:]
-                    puntero = 0
-                    self.crear_error(f"{char}", self.fila, self.columna)
-                    puntero = 0
-                    self.estado = 1
-                    continue
-                self.estado = 2
+                self.s_1()
+                cadena = cadena[1:]
+                puntero = 0
             elif self.estado == 2:
-                puntero, cadena = self.verificar_caracter(char, puntero, ":", cadena)
-                self.estado = 3
+                self.s_2()
+                cadena = cadena[1:]
+                puntero = 0
             elif self.estado == 3:
-                # estado de arreglos
-                if char == "[":
-                    self.tokens.append(
-                        Token(TipoToken.LLAVE_IZQ, "[", self.fila, self.columna)
-                    )
-                    cadena = cadena[1:]
-                    puntero = 0
-                    self.columna += 1
-                    if len(self.tokens) == 2:
-                        cadena = self.leer_instrucciones(cadena, True)
-                    else:
-                        cadena = self.leer_instrucciones(cadena)
-                # estado de palabras reservadas
-                if char == '"':
-                    estado, cadena, puntero = self.crear_objeto(cadena, puntero)
-                    if estado:
-                        self.estado = estado
-                    else:
-                        self.estado = 5
-                elif char == "{":
-                    self.crear_error("Se esperaba un [", self.fila, self.columna)
-                    cadena = self.leer_instrucciones(cadena, True)
-
+                self.s_3()
+                cadena = cadena[1:]
+                puntero = 0
+                cadena = self.leer_instrucciones(cadena)
             elif self.estado == 4:
-                puntero, cadena = self.verificar_caracter(char, puntero, ",", cadena)
-                cadena, puntero = self.un_valor(cadena, puntero)
-                self.estado = 6
-            elif self.estado == 5:
-                puntero, cadena = self.verificar_caracter(char, puntero, ",", cadena)
-                cadena, puntero = self.dos_valores(cadena, puntero)
-                self.estado = 6
+                self.s_4()
+                cadena = cadena[1:]
+                puntero = 0
+                cadena = self.s_5(cadena, puntero)
             elif self.estado == 6:
-                if char != "}":
-                    # print("se esperaba un }")
-                    self.crear_error("Se esperaba un }", self.fila, self.columna)
-                    puntero = 0
-                if char == "}":
-                    cadena = cadena[1:]
-                    puntero = 0
-                    self.columna += 1
-                self.estado = 7
-            elif self.estado in [7, 10]:
+                self.s_6()
+                cadena = cadena[1:]
+                puntero = 0
+                break
+            elif self.estado == 7:
+                self.s_7()
+                cadena = cadena[1:]
+                puntero = 0
+            elif self.estado == 8:
+                self.s_8()
+                cadena = cadena[1:]
+                puntero = 0
+                # self.estado = 0
+            elif self.estado == 9:
+                # _, cadena, puntero = self.crear_objeto(cadena, puntero)
                 if char == ",":
-                    cadena = cadena[1:]
-                    puntero = 0
                     self.columna += 1
-                    cadena, puntero = self.limpiar(cadena)
-                    puntero = 0
-                    if cadena[puntero] == '"' or self.estado == 10:
-                        puntero = 0
-                        break
-                    cadena = self.leer_instrucciones(cadena)
-                elif char == "]":
                     self.tokens.append(
-                        Token(TipoToken.LLAVE_DER, "]", self.fila, self.columna)
+                        Token(TipoToken.COMA, ",", self.fila, self.columna)
                     )
                     cadena = cadena[1:]
                     puntero = 0
-                    self.columna += 1
-                    if coma:
-                        break
-                    self.estado = 8
-                    continue
+                    self.estado = 11
                 else:
-                    self.crear_error("Se esperaba un ,", self.fila, self.columna)
+                    self.estado = 0
                     puntero = 0
-                self.estado = 1
-            elif self.estado == 8:
-                if char == ",":
-                    puntero = 0
-                    if coma:
-                        break
-                elif char == "}":
-                    cadena = cadena[1:]
-                    puntero = 0
-                    self.columna += 1
-                elif char == "]":
-                    if coma:
-                        break
-                elif char != "}" or char != "]":
-                    # print("se esperaba un }")
-                    # self.crear_error("Se esperaba un },] ','", self.fila, self.columna)
-                    puntero = 0
-                self.estado = 7
+            elif self.estado == 11:
+                cadena = self.s_9(cadena, puntero)
+                puntero = 0
+                self.estado = 0
+
+            # self.i += 1
+            # puntero += 1
         return cadena
 
     def limpiar(self, cadena):
@@ -268,23 +278,18 @@ class Analizador:
         return puntero, cadena
 
     def crear_error(self, lexema, fila, columna):
-        nuevo_error = {
-            "No": len(self.errores["errores"]) + 1,
-            "descripcion": {
-                "lexema": lexema,
-                "tipo": "Error",
-                "columna": columna,
-                "fila": fila,
-            },
-        }
-        self.errores["errores"].append(nuevo_error)
+        self.errores.append(
+            Error(len(self.errores) + 1, "Error Léxico", fila, columna, lexema)
+        )
 
-    def crear_objeto(self, cadena, puntero, eserror=False):
+    def crear_objeto(self, cadena, puntero, es_error=False):
         estado, token_type, lexema, cadena = self.crear_lexema(cadena[puntero:])
         puntero = 0
         if lexema and cadena:
             self.columna += 1
-            if not eserror:
+            if not es_error:
+                es_error = True if token_type is None else False
+            if not es_error:
                 lex = Token(token_type, lexema, self.fila, self.columna)
                 self.tokens.append(lex)
             # estado = 7
@@ -316,7 +321,16 @@ class Analizador:
                 self.columna += 1
                 continue
 
+            if char == "," or char == ":":
+                cadena = cadena[puntero:]
+                puntero = 0
+                continue
+            if char == "}":
+                puntero = 0
+                break
+
             if estado == 0:
+                contador += 1
                 if char == "[":
                     self.tokens.append(
                         Token(TipoToken.LLAVE_IZQ, "[", self.fila, self.columna)
@@ -324,25 +338,33 @@ class Analizador:
                     cadena = cadena[1:]
                     puntero = 0
                     self.columna += 1
-                    if (contador % 2) == 0:
-                        # if contador == 2:
-                        cadena = self.leer_instrucciones(cadena)
-                    else:
-                        cadena = self.leer_instrucciones(cadena, True)
-                # estado de palabras reservadas
+                    cadena = self.leer_instrucciones(cadena)
+
+                es_numero = True if (contador % 2) == 0 else False
                 if char == '"':
-                    _, cadena, puntero = self.crear_objeto(cadena, puntero)
+                    if not es_numero:
+                        _, cadena, puntero = self.crear_objeto(cadena, puntero)
+                    elif not self.operaciones_switch:
+                        _, cadena, puntero = self.crear_objeto(cadena, puntero)
+                    else:
+                        self.crear_error(
+                            "Se esperaba un Número", self.fila, self.columna + 1
+                        )
+                        _, cadena, puntero = self.crear_objeto(cadena, puntero, True)
                     # self.estado = estado
                 elif (
                     ord(char) == 43
                     or ord(char) == 45
                     or (ord(char) >= 48 and ord(char) <= 57)
                 ):
-                    lexema, cadena = self.crear_numero(cadena)
+                    lexema, cadena, es_error = self.crear_numero(cadena)
                     if lexema and cadena:
                         self.columna += 1
-                        lex = Token(TipoToken.NUMBER, lexema, self.fila, self.columna)
-                        self.tokens.append(lex)
+                        if not es_error:
+                            lex = Token(
+                                TipoToken.NUMBER, lexema, self.fila, self.columna
+                            )
+                            self.tokens.append(lex)
                         self.columna += len(str(lexema)) + 1
                         puntero = 0
                 elif char != "[":
@@ -352,21 +374,10 @@ class Analizador:
                     puntero = 0
                     self.crear_error(char, self.fila, self.columna)
 
-                if (contador % 2) == 0:
-                    estado = 1
-                else:
-                    estado = 2
-            elif estado == 1:
-                puntero, cadena = self.verificar_caracter(char, puntero, ":", cadena)
-                contador += 1
-                estado = 0
-            elif estado == 2:
-                if char == "}":
-                    puntero = 0
-                    break
-                contador += 1
-                puntero, cadena = self.verificar_caracter(char, puntero, ",", cadena)
-                estado = 0
+                # if (contador % 2) == 0:
+                #     estado = 1
+                # else:
+                #     estado = 2
 
         return cadena, puntero
 
@@ -374,27 +385,39 @@ class Analizador:
         numero = ""
         puntero = 0
         es_decimal = False
+        es_error = False
         for char in cadena:
             puntero += 1
             if char == ".":
                 es_decimal = True
+
             if (
                 char == '"'
-                or char == " "
                 or char == "\n"
                 or char == "\t"
                 or char == ","
+                or (not char.isdigit() and char != ".")
             ):
                 if es_decimal:
-                    return float(numero), cadena[puntero - 1 :]
-                else:
-                    return int(numero), cadena[puntero - 1 :]
+                    return float(numero), cadena[puntero - 1 :], es_error
+                return int(numero), cadena[puntero - 1 :], es_error
             else:
-                numero += char
+                if es_decimal:
+                    if char == "." and "." in numero:
+                        self.crear_error(
+                            "no se pueden tener más de dos .",
+                            self.fila,
+                            self.columna + len(numero),
+                        )
+                        es_error = True
+                    else:
+                        numero += char
+                else:
+                    numero += char
 
     def imprimir(self):
         for lexema in self.tokens:
-            print(f"{lexema.valor}-{lexema.tipo}")
+            print(f"{lexema.valor}---{lexema.columna}")
         for error in self.errores["errores"]:
             print(error)
 
@@ -410,24 +433,29 @@ class Analizador:
                 or char == "\n"
                 or char == "\t"
                 or char == ":"
+                or char == ","
             ):
                 if char == ":":
                     puntero -= 1
 
-                if char != '"':
+                if char != '"' and self.abierto:
                     self.crear_error(
-                        'se esperaba un "', self.fila, self.columna + len(lexema) + 1
+                        'se esperaba un "', self.fila, self.columna + len(lexema)
                     )
                 token_type = None
                 for pattern, pattern_type in self.patterns:
                     if re.fullmatch(pattern, lexema):
                         token_type = pattern_type
                         break
-                if token_type:
-                    if token_type in [TipoToken.O_OPERACION]:
-                        self.esoperacion = True
-                        return None, token_type, lexema, cadena[puntero:]
-                    if self.esoperacion:
+                if token_type in [TipoToken.O_OPERACION]:
+                    self.esoperacion = True
+                    return None, token_type, lexema, cadena[puntero:]
+
+                if token_type in [TipoToken.CONFIGURACIONES, TipoToken.PALABRA_CLAVE]:
+                    self.operaciones_switch = False
+
+                if self.esoperacion:
+                    if token_type:
                         if token_type in [
                             TipoToken.O_INVERSO,
                             TipoToken.O_SENO,
@@ -443,19 +471,20 @@ class Analizador:
                             TipoToken.O_OPERACION,
                         ]:
                             self.esoperacion = False
-                            return 5, token_type, lexema, cadena[puntero:]
+                            return 9, token_type, lexema, cadena[puntero:]
                         else:
                             self.crear_error(lexema, self.fila, self.columna)
                             self.esoperacion = False
-                            break
+                            return 9, None, lexema, cadena[puntero:]
                     else:
-                        if token_type in [TipoToken.STRING]:
-                            return 5, token_type, lexema, cadena[puntero:]
-                        else:
-                            return None, token_type, lexema, cadena[puntero:]
+                        self.crear_error(lexema, self.fila, self.columna)
+                        self.esoperacion = False
+                        return 9, None, lexema, cadena[puntero:]
                 else:
-                    self.crear_error(lexema, self.fila, self.columna)
-                    break
+                    if isinstance(lexema, str):
+                        return 0, TipoToken.STRING, lexema, cadena[puntero:]
+                    else:
+                        return 0, token_type, lexema, cadena[puntero:]
             else:
                 lexema += char
         return None, None, None, cadena[puntero:]
@@ -535,6 +564,12 @@ class Analizador:
             print(i)
 
 
+# text = ""
+# with open(
+#     "C:\\Users\\mesoi\\Documents\\1U^NI6VxExD@D\\2023\\2. SEGUNDO SEMESTRE\\LFP\\Lab\\Proyecto 1\\entrada.json",
+#     "r",
+# ) as json_file:
+#     text = json_file.read()
 # analizado = Analizador()
 # analizado.leer_instrucciones(text)
 # analizado.imprimir()

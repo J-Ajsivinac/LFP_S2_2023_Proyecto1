@@ -43,6 +43,7 @@ class TipoToken(Enum):
     ERROR = 22
     OPERACIONES = 23
     CONFIGURACIONES = 24
+    COMILLA = 25
 
 
 class Estados(Enum):
