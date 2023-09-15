@@ -121,7 +121,7 @@ class Analizador:
         return cadena
 
     def s_1(self):
-        self.tokens.append(Token(TipoToken.LLAVE_IZQ, "{", self.fila, self.columna))
+        self.tokens.append(Token(TipoToken.CORCHETE_IZQ, "{", self.fila, self.columna))
         self.estado = 0
 
     def s_2(self):
@@ -129,7 +129,7 @@ class Analizador:
         self.estado = 0
 
     def s_3(self):
-        self.tokens.append(Token(TipoToken.CORCHETE_IZQ, "[", self.fila, self.columna))
+        self.tokens.append(Token(TipoToken.LLAVE_IZQ, "[", self.fila, self.columna))
         self.estado = 0
 
     def s_4(self):
@@ -138,7 +138,7 @@ class Analizador:
         self.abierto = False if self.abierto else True
 
     def s_5(self, cadena, puntero):
-        estado, cadena, puntero = self.crear_objeto(cadena, puntero, not self.abierto)
+        estado, cadena, puntero = self.crear_objeto(cadena, puntero)
         if estado:
             self.estado = estado
         else:
@@ -154,7 +154,7 @@ class Analizador:
         self.estado = 0
 
     def s_8(self):
-        self.tokens.append(Token(TipoToken.LLAVE_DER, "}", self.fila, self.columna))
+        self.tokens.append(Token(TipoToken.CORCHETE_DER, "}", self.fila, self.columna))
         self.estado = 0
 
     def s_9(self, cadena, puntero):
@@ -286,8 +286,8 @@ class Analizador:
         puntero = 0
         if lexema and cadena:
             self.columna += 1
-            if not es_error:
-                es_error = True if token_type is None else False
+            # if not es_error:
+            #     es_error = True if token_type is None else False
             if not es_error:
                 lex = Token(token_type, lexema, self.fila, self.columna)
                 self.tokens.append(lex)
@@ -474,16 +474,16 @@ class Analizador:
                         else:
                             self.crear_error(lexema, self.fila, self.columna)
                             self.esoperacion = False
-                            return 9, None, lexema, cadena[puntero:]
+                            return 9, token_type, lexema, cadena[puntero:]
                     else:
                         self.crear_error(lexema, self.fila, self.columna)
                         self.esoperacion = False
                         return 9, None, lexema, cadena[puntero:]
                 else:
-                    if isinstance(lexema, str):
-                        return 0, TipoToken.STRING, lexema, cadena[puntero:]
-                    else:
+                    if token_type:
                         return 0, token_type, lexema, cadena[puntero:]
+                    else:
+                        return 0, TipoToken.STRING, lexema, cadena[puntero:]
             else:
                 lexema += char
         return None, None, None, cadena[puntero:]
