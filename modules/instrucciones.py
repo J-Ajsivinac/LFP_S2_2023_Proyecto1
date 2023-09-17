@@ -2,7 +2,6 @@ from modules.Abstract.token import Token, TipoToken
 import math
 import graphviz
 import copy
-from collections import OrderedDict
 
 
 class Instrucciones:
@@ -58,9 +57,14 @@ class Instrucciones:
             if lexema.tipo == TipoToken.STRING:
                 if self.tokens[0].tipo == TipoToken.STRING:
                     continue
-                valor = self.tokens.pop(0)
-                if valor.tipo in [TipoToken.CORCHETE_IZQ, TipoToken.LLAVE_DER]:
-                    break
+                temp = self.tokens.pop(0)
+                while temp.tipo in [
+                    TipoToken.COMILLA,
+                    TipoToken.DOS_PUNTOS,
+                    TipoToken.CORCHETE_IZQ,
+                ]:
+                    temp = self.tokens.pop(0)
+                valor = temp
                 if valor.tipo == TipoToken.LLAVE_IZQ:
                     self.temp.append(valor.valor)
                     valores.append(self.operar(ind + 1, True))
@@ -69,8 +73,9 @@ class Instrucciones:
                         self.temp.append(valor.valor)
                         valores.append(valor.valor)
 
-            if lexema.tipo in [TipoToken.CORCHETE_IZQ, TipoToken.LLAVE_DER]:
+            if lexema.tipo in [TipoToken.LLAVE_DER, TipoToken.CORCHETE_DER]:
                 self.temp.append(lexema.valor)
+            if lexema.tipo in [TipoToken.O_OPERACION, TipoToken.CORCHETE_IZQ]:
                 break
         if len(valores) == 0 and len(self.tokens) == 0 and not op:
             return None
@@ -85,14 +90,20 @@ class Instrucciones:
                 result *= valor
             regresar = result
         elif op.tipo == TipoToken.O_DIVISION:
-            result = valores[0]
-            for valor in valores[1:]:
-                result /= valor
+            result = valores[0] / valores[1]
             regresar = result
         elif op.tipo == TipoToken.O_POTENCIA:
             regresar = math.pow(valores[0], valores[1])
+        elif op.tipo == TipoToken.O_RAIZ:
+            regresar = math.pow(valores[0], 0.5)
         elif op.tipo == TipoToken.O_SENO:
             regresar = math.sin(math.radians(valores[0]))
+        elif op.tipo == TipoToken.O_COSENO:
+            regresar = math.cos(math.radians(valores[0]))
+        elif op.tipo == TipoToken.O_TANGENTE:
+            regresar = math.tan(math.radians(valores[0]))
+        elif op.tipo == TipoToken.O_MOD:
+            regresar = valor[0] % valor[1]
         else:
             print(f"Operación no soportada: {op}")
         valores.reverse()
@@ -137,7 +148,6 @@ class Instrucciones:
     def crear_nodos(self, i, ins, anterior=None):
         j = 0
         ind = 0
-        # for valor in ins:
         while ins:
             if ind >= len(ins):
                 return None
@@ -156,7 +166,7 @@ class Instrucciones:
                 # print(f"---{cabeza}---")
             elif isinstance(valor, (int, float)):
                 self.dot.node(f"{self.i}_{i}_{j}", label=f"{valor}")
-                print(f"{valor}")
+                # print(f"{valor}")
                 self.dot.edge(cabeza, f"{self.i}_{i}_{j}")
                 j += 1
             elif valor in ["]", "{"]:

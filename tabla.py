@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from modules.Abstract.token import TipoToken
 import sv_ttk
 
 
@@ -42,8 +43,42 @@ class Ventana2:
     def agregar_datos(self):
         for i, dato in enumerate(self.datos):
             valor = dato.valor
-            tipo = dato.tipo
+            tipo = self.mostrar_tipo(dato.tipo)
             fila = dato.fila
             columna = dato.columna
             agregar = (valor, fila, columna, tipo)
             self.tabla.insert(parent="", index=i, values=agregar)
+
+    def mostrar_tipo(self, tipo_buscar):
+        tipos = {
+            TipoToken.CORCHETE_IZQ: "Corchete de Apertura",
+            TipoToken.CORCHETE_DER: "Corchete de Cerradura",
+            TipoToken.LLAVE_IZQ: "Llave de Apertura",
+            TipoToken.LLAVE_DER: "Llave de Cerradura",
+            TipoToken.COMA: "Coma",
+            TipoToken.DOS_PUNTOS: "Dos Puntos",
+            TipoToken.STRING: "Valor",
+            TipoToken.NUMBER: "Número",
+            TipoToken.O_SUMA: "Reservada Suma",
+            TipoToken.O_RESTA: "Reservada Resta",
+            TipoToken.O_MULTIPLICACION: "Reservada Multiplicación",
+            TipoToken.O_DIVISION: "Reservada Divisíón",
+            TipoToken.O_POTENCIA: "Reservada Potencia",
+            TipoToken.O_RAIZ: "Reservada Raiz",
+            TipoToken.O_INVERSO: "Reservada Inverso",
+            TipoToken.O_SENO: "Reservada Seno",
+            TipoToken.O_COSENO: "Reservada Coseno",
+            TipoToken.O_TANGENTE: "Reservada Tangente",
+            TipoToken.O_MOD: "Reservada Mod",
+            TipoToken.PALABRA_CLAVE: "p",
+            TipoToken.O_OPERACION: "Reservada Operacion",
+            TipoToken.OPERACIONES: "Reservada Operaciones",
+            TipoToken.CONFIGURACIONES: "Reservada Configuracione",
+            TipoToken.COMILLA: "Comilla Abierta",
+            TipoToken.PALABRA_CLAVE_FONDO: "Reservada Fondo",
+            TipoToken.PALABRA_CLAVE_FORMA: "Reservada Forma",
+            TipoToken.PALABRA_CLAVE_FUENTE: "Reservada Fuente",
+            TipoToken.PALABRA_CLAVE_TEXT: "Reservada Text",
+        }
+
+        return tipos[tipo_buscar]

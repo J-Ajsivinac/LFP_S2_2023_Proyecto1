@@ -12,14 +12,12 @@ import json
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-
         self.title("Ventana Principal")
         self.geometry("1066x610")
-
         self.resizable(0, 0)
+        sv_ttk.set_theme("dark")
 
         Contendio(self)
-        sv_ttk.set_theme("dark")
 
         self.style = ttk.Style()
         self.style.configure("TButton", font=("Montserrat SemiBold", 12), border=0)
@@ -37,7 +35,7 @@ class Contendio(ttk.Frame):
         self.parent = parent
         self.pack(padx=40, pady=9, fill="x", side="top")
         self.style = ttk.Style()
-        self.style.configure("My.TFrame", background="yellow")
+        self.style.configure("My.TFrame")
         self.config(style="My.TFrame")
         self.errores = []
         self.tokens_totales = []
@@ -132,7 +130,7 @@ class Contendio(ttk.Frame):
             messagebox.showerror(message="No hay información cargada", title="Error")
             return None
         analizar = analizador.Analizador()
-        analizar.leer_instrucciones(texto)
+        analizar.leer_instrucciones(texto.lower())
         # print(analizar.tokens)
         self.errores = copy.deepcopy(analizar.errores)
         self.tokens_totales = copy.deepcopy(analizar.tokens)
@@ -143,13 +141,14 @@ class Contendio(ttk.Frame):
         return "break"
 
     def actualizar_contador(self, event):
+        self.contador.configure(state="normal")
         contenido = self.text_area.get("1.0", "end-1c")
         lineas = contenido.split("\n")
         numero_de_lineas = "\n".join([f"{i + 1}" for i, linea in enumerate(lineas)])
-        self.contador.config(state=tk.NORMAL)
+        # self.contador.config(state=tk.NORMAL)
         self.contador.delete("1.0", tk.END)
         self.contador.insert("1.0", f"{numero_de_lineas}")
-        self.contador.config(state=tk.DISABLED)
+        self.contador.configure(state="disabled")
 
     def sync_scrollbars(self, *args):
         # Cuando se desplaza el scrollbar, se actualizan las posiciones de los widgets Text
@@ -173,6 +172,7 @@ class Contendio(ttk.Frame):
             width=5,
             yscrollcommand=self.vscrollbar.set,
             border=0,
+            state="disabled",
         )
 
         self.text_area = tk.Text(

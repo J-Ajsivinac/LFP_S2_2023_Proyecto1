@@ -44,6 +44,11 @@ class TipoToken(Enum):
     OPERACIONES = 23
     CONFIGURACIONES = 24
     COMILLA = 25
+    COMILLA_D = 25
+    PALABRA_CLAVE_TEXT = 26
+    PALABRA_CLAVE_FONDO = 27
+    PALABRA_CLAVE_FUENTE = 28
+    PALABRA_CLAVE_FORMA = 29
 
 
 class Estados(Enum):
