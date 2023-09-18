@@ -1,28 +1,20 @@
 from modules.Abstract.token import Token, TipoToken
+from modules.graph import Graph
 import math
-import graphviz
 import copy
 
 
 class Instrucciones:
-    def __init__(self, tokens, nombre):
+    def __init__(self, tokens):
         self.tokens = tokens
         self.instrucciones = []
-        self.nombre = nombre
-        self.dot = graphviz.Digraph(
-            f"{nombre}",
-            filename=f"{nombre}.gv",
-            node_attr={
-                "shape": "box",
-                "fontname": "Verdana",
-                "fillcolor": "#ffffff",
-                "color": "#cec9f1",
-                "style": "filled,rounded",
-            },
-            format="svg",
-        )
-        self.i = 0
         self.temp = []
+        self.configuraciones = {
+            TipoToken.PALABRA_CLAVE_TEXT: None,
+            TipoToken.PALABRA_CLAVE_FONDO: None,
+            TipoToken.PALABRA_CLAVE_FUENTE: None,
+            TipoToken.PALABRA_CLAVE_FORMA: None,
+        }
 
     def operar(self, indice=0, recursivo=False):
         valores = []
@@ -46,8 +38,24 @@ class Instrucciones:
                 TipoToken.O_MOD,
             ]:
                 op = lexema
-                cabeza = f"{op.valor}_{self.i}_{ind}"
+                cabeza = f"{op.valor}_{0}_{ind}"
                 break
+            elif lexema.tipo in [
+                TipoToken.PALABRA_CLAVE_FONDO,
+                TipoToken.PALABRA_CLAVE_FORMA,
+                TipoToken.PALABRA_CLAVE_FUENTE,
+                TipoToken.PALABRA_CLAVE_TEXT,
+            ]:
+                tipo = lexema
+                temp = self.tokens.pop(0)
+                while temp.tipo in [
+                    TipoToken.COMILLA,
+                    TipoToken.DOS_PUNTOS,
+                ]:
+                    temp = self.tokens.pop(0)
+                if temp.tipo in [TipoToken.STRING, TipoToken.OPERACIONES]:
+                    self.configuraciones[tipo.tipo] = temp.valor
+
         if not op:
             return
         self.temp.append(op.valor + "\n")
@@ -73,9 +81,16 @@ class Instrucciones:
                         self.temp.append(valor.valor)
                         valores.append(valor.valor)
 
-            if lexema.tipo in [TipoToken.LLAVE_DER, TipoToken.CORCHETE_DER]:
+            if lexema.tipo in [TipoToken.LLAVE_DER]:
                 self.temp.append(lexema.valor)
-            if lexema.tipo in [TipoToken.O_OPERACION, TipoToken.CORCHETE_IZQ]:
+            if lexema.tipo == TipoToken.CORCHETE_DER:
+                if recursivo:
+                    lexema = self.tokens.pop(0)
+                    if lexema.tipo == TipoToken.LLAVE_DER:
+                        self.temp.append(lexema.valor)
+                        break
+                break
+            if lexema.tipo == TipoToken.O_OPERACION:
                 break
         if len(valores) == 0 and len(self.tokens) == 0 and not op:
             return None
@@ -109,67 +124,24 @@ class Instrucciones:
         valores.reverse()
 
         self.temp[iterador] += str(regresar)
-        # self.temp.append(regresar)
 
-        # self.temp.append(regresar)
-        # self.temp.append(op.valor + "\n" + str(regresar))
-        # for i, valor in enumerate(valores):
-        #     self.temp[f"valor{ind}_{i}"] = valor
-        # self.temp[f"operacion_{ind}"] = op.valor + " " + str(regresar)
         return regresar
 
     def iniciar(self):
         operacion = ""
+
         while True:
             operacion = self.operar()
             if operacion is not None:
-                # self.temp.reverse()
-                # self.temp.reverse()
                 self.instrucciones.append(copy.deepcopy(self.temp))
-                # self.i += 1
             else:
                 break
             self.temp.clear()
         # for i in self.instrucciones:
         #     print(i, "------")
-        self.genera_operaciones()
+        self.llamar_grafica()
+        # print(self.configuraciones)
 
-    def crear_grafo(self):
-        pass
-
-    def genera_operaciones(self):
-        for ins in self.instrucciones:
-            self.crear_nodos(0, ins)
-            # print(ins)
-            self.i += 1
-        self.dot.format = "svg"
-        self.dot.render("resultados/arbol1", view=True)
-
-    def crear_nodos(self, i, ins, anterior=None):
-        j = 0
-        ind = 0
-        while ins:
-            if ind >= len(ins):
-                return None
-            valor = ins[ind]
-            if j == 0:
-                self.dot.node(f"{self.i}_{i}_{j}", label=f"{valor}")
-                cabeza = f"{self.i}_{i}_{j}"
-                if anterior:
-                    self.dot.edge(anterior, f"{self.i}_{i}_{j}")
-                    # print(valor, anterior, f"{self.i}_{i}_{j}")
-                j += 1
-
-            elif valor == "[":
-                ins = self.crear_nodos(i + 1, ins[ind + 1 :], cabeza)
-                ind = 0
-                # print(f"---{cabeza}---")
-            elif isinstance(valor, (int, float)):
-                self.dot.node(f"{self.i}_{i}_{j}", label=f"{valor}")
-                # print(f"{valor}")
-                self.dot.edge(cabeza, f"{self.i}_{i}_{j}")
-                j += 1
-            elif valor in ["]", "{"]:
-                return ins[ind:]
-            ind += 1
-        return None
+    def llamar_grafica(self):
+        grafica = Graph(self.configuraciones, self.instrucciones)
+        grafica.genera_operaciones()

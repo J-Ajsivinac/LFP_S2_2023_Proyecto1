@@ -122,6 +122,7 @@ class Contendio(ttk.Frame):
 
     def cargar_datos(self):
         self.archivo_actual = lectura.cargar_json(self.text_area)
+        self.actualizar_contador()
 
     def analizar_datos(self):
         texto = self.text_area.get("1.0", "end")
@@ -140,20 +141,43 @@ class Contendio(ttk.Frame):
         self.text_area.insert(tk.INSERT, "    ")
         return "break"
 
-    def actualizar_contador(self, event):
-        self.contador.configure(state="normal")
-        contenido = self.text_area.get("1.0", "end-1c")
-        lineas = contenido.split("\n")
-        numero_de_lineas = "\n".join([f"{i + 1}" for i, linea in enumerate(lineas)])
-        # self.contador.config(state=tk.NORMAL)
-        self.contador.delete("1.0", tk.END)
-        self.contador.insert("1.0", f"{numero_de_lineas}")
-        self.contador.configure(state="disabled")
+    def actualizar_contador(self, event=None):
+        codigo_lineas = self.text_area.get("1.0", "end-1c").split("\n")
+        num_lineas = len(codigo_lineas) + 1
+        self.contador.config(state="normal")
+        self.contador.delete(1.0, "end")
+        for i in range(1, num_lineas):
+            if i == (num_lineas - 1):
+                self.contador.insert("end", f"{i}")
+            else:
+                self.contador.insert("end", f"{i}\n")
+
+        self.contador.config(state="disabled")
+
+        tempo = self.text_area.yview()
+        self.contador.yview_moveto(tempo[0])
+
+    def actualizar_c(self, event=None):
+        codigo_lineas = self.text_area.get("1.0", "end-1c").split("\n")
+        num_lineas = len(codigo_lineas) + 1
+        self.contador.config(state="normal")
+        self.contador.delete(1.0, "end")
+        for i in range(1, num_lineas):
+            if i == (num_lineas - 1):
+                self.contador.insert("end", f"{i}")
+            else:
+                self.contador.insert("end", f"{i}\n")
+        tempo = self.text_area.yview()
+        self.contador.yview_moveto(tempo[0])
+        self.contador.config(state="disabled")
 
     def sync_scrollbars(self, *args):
         # Cuando se desplaza el scrollbar, se actualizan las posiciones de los widgets Text
         self.text_area.yview(*args)
         self.contador.yview(*args)
+
+    def bloquear_scroll(self, event):
+        return "break"
 
     def sync_text_widgets(self, *args):
         # Cuando se desplaza uno de los widgets Text, se actualiza la posición del scrollbar y del otro widget Text
@@ -164,16 +188,29 @@ class Contendio(ttk.Frame):
         panel = ttk.Frame()
         panel.pack(padx=40, pady=16, fill="both", expand=True)
         panel.config(style="FrameText.TFrame")
+        label = tk.Label(panel, text="Ruta", background="#2f2f2f", height=1)
+        label.pack(fill="x")
         self.hscrollbar = ttk.Scrollbar(panel, orient=tk.HORIZONTAL)
         self.vscrollbar = ttk.Scrollbar(panel, orient=tk.VERTICAL)
         self.contador = tk.Text(
             panel,
             font=("Cascadia Code", 12),
             width=5,
-            yscrollcommand=self.vscrollbar.set,
             border=0,
             state="disabled",
+            yscrollcommand=self.vscrollbar.set,
         )
+        # self.contador.configure(state="normal")
+        # self.contador.insert("1.0", "1")
+        # self.contador.configure(state="disabled")
+
+        self.contador.bind(
+            "<MouseWheel>", self.bloquear_scroll
+        )  # Bloquea el desplazamiento con la rueda del ratón
+        self.contador.bind(
+            "<Up>", self.bloquear_scroll
+        )  # Bloquea el desplazamiento hacia arriba con la tecla flecha arriba
+        self.contador.bind("<Down>", self.bloquear_scroll)
 
         self.text_area = tk.Text(
             panel,
@@ -191,11 +228,13 @@ class Contendio(ttk.Frame):
 
         self.vscrollbar.config(command=self.sync_scrollbars)
         self.text_area.config(yscrollcommand=self.sync_text_widgets)
-        self.contador.config(yscrollcommand=self.sync_text_widgets)
+        # self.contador.config(yscrollcommand=self.sync_text_widgets)
 
         self.vscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.text_area.pack(expand=True, fill="both")
         self.text_area.bind("<KeyRelease>", self.actualizar_contador)
+        # self.text_area.bind("<BackSpace>", self.actualizar_c)
+        self.actualizar_contador(None)
 
     def crear_archivo_error(self):
         json_error = {"errores": []}
@@ -215,7 +254,7 @@ class Contendio(ttk.Frame):
             json_file.write(json_data)
 
     def crear_reporte(self):
-        i = instrucciones.Instrucciones(self.tokens_totales, "test")
+        i = instrucciones.Instrucciones(self.tokens_totales)
         i.iniciar()
 
     def abrir_ventana(self):

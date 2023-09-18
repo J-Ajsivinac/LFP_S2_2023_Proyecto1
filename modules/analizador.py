@@ -24,7 +24,7 @@ class Analizador:
             ("seno", TipoToken.O_SENO),
             ("coseno", TipoToken.O_COSENO),
             ("tangente", TipoToken.O_TANGENTE),
-            ("text", TipoToken.PALABRA_CLAVE_TEXT),
+            ("texto", TipoToken.PALABRA_CLAVE_TEXT),
             ("fondo", TipoToken.PALABRA_CLAVE_FONDO),
             ("fuente", TipoToken.PALABRA_CLAVE_FUENTE),
             ("forma", TipoToken.PALABRA_CLAVE_FORMA),
