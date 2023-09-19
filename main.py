@@ -7,6 +7,7 @@ from modules import lectura, analizador, instrucciones
 from tabla import Ventana2
 import copy
 import json
+import os
 
 
 class App(tk.Tk):
@@ -122,7 +123,10 @@ class Contendio(ttk.Frame):
 
     def cargar_datos(self):
         self.archivo_actual = lectura.cargar_json(self.text_area)
-        self.actualizar_contador()
+        if self.archivo_actual:
+            _, nombre = os.path.split(self.archivo_actual)
+            self.nombre_archivo.config(text=nombre)
+            self.actualizar_contador()
 
     def analizar_datos(self):
         texto = self.text_area.get("1.0", "end")
@@ -188,8 +192,14 @@ class Contendio(ttk.Frame):
         panel = ttk.Frame()
         panel.pack(padx=40, pady=16, fill="both", expand=True)
         panel.config(style="FrameText.TFrame")
-        label = tk.Label(panel, text="Ruta", background="#2f2f2f", height=1)
-        label.pack(fill="x")
+        self.nombre_archivo = tk.Label(
+            panel,
+            text="Nuevo Documento.json",
+            background="#2b3241",
+            font=("Montserrat SemiBold", 11),
+            foreground="#4c95ff",
+        )
+        self.nombre_archivo.pack(fill="x")
         self.hscrollbar = ttk.Scrollbar(panel, orient=tk.HORIZONTAL)
         self.vscrollbar = ttk.Scrollbar(panel, orient=tk.VERTICAL)
         self.contador = tk.Text(
@@ -237,25 +247,31 @@ class Contendio(ttk.Frame):
         self.actualizar_contador(None)
 
     def crear_archivo_error(self):
-        json_error = {"errores": []}
-        for error in self.errores:
-            error_dict = {
-                "No": error.numero,
-                "descripcion": {
-                    "lexema": error.lexema,
-                    "tipo": error.tipo,
-                    "columna": error.columna,
-                    "fila": error.fila,
-                },
-            }
-            json_error["errores"].append(error_dict)
-        json_data = json.dumps(json_error, indent=4, ensure_ascii=False)
-        with open("errores.json", "w", encoding="utf-8") as json_file:
-            json_file.write(json_data)
+        if self.tokens_totales:
+            json_error = {"errores": []}
+            for error in self.errores:
+                error_dict = {
+                    "No": error.numero,
+                    "descripcion": {
+                        "lexema": error.lexema,
+                        "tipo": error.tipo,
+                        "columna": error.columna,
+                        "fila": error.fila,
+                    },
+                }
+                json_error["errores"].append(error_dict)
+            json_data = json.dumps(json_error, indent=4, ensure_ascii=False)
+            with open("errores.json", "w", encoding="utf-8") as json_file:
+                json_file.write(json_data)
+        else:
+            messagebox.showerror(message="No hay datos analizados", title="Error")
 
     def crear_reporte(self):
-        i = instrucciones.Instrucciones(self.tokens_totales)
-        i.iniciar()
+        if self.tokens_totales:
+            i = instrucciones.Instrucciones(self.tokens_totales)
+            i.iniciar()
+        else:
+            messagebox.showerror(message="No hay datos analizados", title="Error")
 
     def abrir_ventana(self):
         self.analizar_datos()
@@ -268,15 +284,20 @@ class Contendio(ttk.Frame):
             filetypes=[("Archivos de texto", "*.json"), ("Todos los archivos", "*.*")],
         )
         if archivo:
+            self.archivo_actual = archivo.name
+            print(self.archivo_actual)
             contenido = self.text_area.get("1.0", tk.END)
             archivo.write(contenido)
             archivo.close()
+            _, nombre = os.path.split(self.archivo_actual)
+            self.nombre_archivo.config(text=nombre)
 
     def guardar(self):
         if self.archivo_actual:
             with open(self.archivo_actual, "w", encoding="UTF-8") as archivo:
                 contenido = self.text_area.get("1.0", tk.END)
                 archivo.write(contenido)
+                messagebox.showinfo(message="Archivo Guardado", title="Éxito")
         else:
             messagebox.showerror(
                 message="No se ha cargado ningún archivo previamente.",

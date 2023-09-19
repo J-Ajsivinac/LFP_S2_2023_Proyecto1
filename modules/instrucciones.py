@@ -111,6 +111,8 @@ class Instrucciones:
             regresar = math.pow(valores[0], valores[1])
         elif op.tipo == TipoToken.O_RAIZ:
             regresar = math.pow(valores[0], 0.5)
+        elif op.tipo == TipoToken.O_INVERSO:
+            regresar = 1 / valores[0]
         elif op.tipo == TipoToken.O_SENO:
             regresar = math.sin(math.radians(valores[0]))
         elif op.tipo == TipoToken.O_COSENO:
@@ -118,7 +120,7 @@ class Instrucciones:
         elif op.tipo == TipoToken.O_TANGENTE:
             regresar = math.tan(math.radians(valores[0]))
         elif op.tipo == TipoToken.O_MOD:
-            regresar = valor[0] % valor[1]
+            regresar = valores[0] % valores[1]
         else:
             print(f"Operación no soportada: {op}")
         valores.reverse()

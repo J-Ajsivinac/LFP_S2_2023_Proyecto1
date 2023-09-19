@@ -9,7 +9,7 @@ class Analizador:
         self.errores = []
         self.estado = 0
         self.fila = 1
-        self.columna = 0
+        self.columna = 1
         self.instrucciones = []
         self.abierto = False
         self.patterns = [
@@ -21,9 +21,12 @@ class Analizador:
             ("multiplicacion", TipoToken.O_MULTIPLICACION),
             ("division", TipoToken.O_DIVISION),
             ("potencia", TipoToken.O_POTENCIA),
+            ("raiz", TipoToken.O_RAIZ),
+            ("inverso", TipoToken.O_INVERSO),
             ("seno", TipoToken.O_SENO),
             ("coseno", TipoToken.O_COSENO),
             ("tangente", TipoToken.O_TANGENTE),
+            ("mod", TipoToken.O_MOD),
             ("texto", TipoToken.PALABRA_CLAVE_TEXT),
             ("fondo", TipoToken.PALABRA_CLAVE_FONDO),
             ("fuente", TipoToken.PALABRA_CLAVE_FUENTE),
@@ -33,16 +36,16 @@ class Analizador:
     def s_0(self, caracter, cadena):
         if caracter == "{":
             self.estado = 1
-            self.columna += 1
+            # self.columna += 1
         elif caracter == ":":
             self.estado = 2
-            self.columna += 1
+            # self.columna += 1
         elif caracter == "[":
             self.estado = 3
-            self.columna += 1
+            # self.columna += 1
         elif caracter == '"':
             self.estado = 4
-            self.columna += 1
+            # self.columna += 1
         elif (caracter.isalpha()) and self.abierto:
             self.estado = 5
             # self.columna += 1
@@ -51,15 +54,15 @@ class Analizador:
             # self.columna += 1
         elif caracter == "]":
             self.estado = 6
-            self.columna += 1
+            # self.columna += 1
         elif caracter == ",":
             self.estado = 7
-            self.columna += 1
+            # self.columna += 1
         elif caracter == "}":
             self.estado = 8
-            self.columna += 1
+            # self.columna += 1
         elif caracter == ",":
-            self.columna += 1
+            # self.columna += 1
             self.tokens.append(Token(TipoToken.COMA, ",", self.fila, self.columna))
             cadena = cadena[1:]
             self.estado = 0
@@ -71,18 +74,22 @@ class Analizador:
 
     def s_1(self):
         self.tokens.append(Token(TipoToken.CORCHETE_IZQ, "{", self.fila, self.columna))
+        self.columna += 1
         self.estado = 0
 
     def s_2(self):
         self.tokens.append(Token(TipoToken.DOS_PUNTOS, ":", self.fila, self.columna))
+        self.columna += 1
         self.estado = 0
 
     def s_3(self):
         self.tokens.append(Token(TipoToken.LLAVE_IZQ, "[", self.fila, self.columna))
+        self.columna += 1
         self.estado = 0
 
     def s_4(self):
         self.tokens.append(Token(TipoToken.COMILLA, '"', self.fila, self.columna))
+        self.columna += 1
         self.estado = 0
         self.abierto = False if self.abierto else True
 
@@ -96,18 +103,22 @@ class Analizador:
 
     def s_6(self):
         self.tokens.append(Token(TipoToken.LLAVE_DER, "]", self.fila, self.columna))
+        self.columna += 1
         self.estado = 0
 
     def s_7(self):
         self.tokens.append(Token(TipoToken.COMA, ",", self.fila, self.columna))
+        self.columna += 1
         self.estado = 0
 
     def s_8(self):
         self.tokens.append(Token(TipoToken.CORCHETE_DER, "}", self.fila, self.columna))
+        self.columna += 1
         self.estado = 0
 
     def s_9(self, cadena, puntero):
         cadena, puntero = self.dos_valores(cadena, puntero)
+        self.columna += 1
         self.estado = 0
         return cadena
 
@@ -266,7 +277,7 @@ class Analizador:
                     if char.isdigit():
                         numero += char
                     else:
-                        self.crear_error(char, self.fila, self.columna)
+                        self.crear_error(char, self.fila, self.columna + len(numero))
 
     def crear_lexema(self, cadena):
         lexema = ""
@@ -300,5 +311,5 @@ class Analizador:
                 if char.isalpha() or char.isdigit():
                     lexema += char
                 else:
-                    self.crear_error(char, self.fila, self.columna)
+                    self.crear_error(char, self.fila, self.columna + len(lexema))
         return None, None, None, cadena[puntero:]
