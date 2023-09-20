@@ -36,36 +36,27 @@ class Analizador:
     def s_0(self, caracter, cadena):
         if caracter == "{":
             self.estado = 1
-            # self.columna += 1
         elif caracter == ":":
             self.estado = 2
-            # self.columna += 1
         elif caracter == "[":
             self.estado = 3
-            # self.columna += 1
         elif caracter == '"':
             self.estado = 4
-            # self.columna += 1
         elif (caracter.isalpha()) and self.abierto:
             self.estado = 5
-            # self.columna += 1
-        elif caracter.isdigit() or ord(caracter) == 43 or ord(caracter) == 45:
+        elif (
+            caracter.isdigit()
+            or ord(caracter) == 43
+            or ord(caracter) == 45
+            or ord(caracter) == 48
+        ):
             self.estado = 9
-            # self.columna += 1
         elif caracter == "]":
             self.estado = 6
-            # self.columna += 1
         elif caracter == ",":
             self.estado = 7
-            # self.columna += 1
         elif caracter == "}":
             self.estado = 8
-            # self.columna += 1
-        elif caracter == ",":
-            # self.columna += 1
-            self.tokens.append(Token(TipoToken.COMA, ",", self.fila, self.columna))
-            cadena = cadena[1:]
-            self.estado = 0
         else:
             self.crear_error(caracter, self.fila, self.columna)
             self.columna += 1
@@ -173,9 +164,6 @@ class Analizador:
                 cadena = self.s_9(cadena, puntero)
                 puntero = 0
                 self.estado = 0
-
-            # self.i += 1
-            # puntero += 1
         return cadena
 
     def limpiar(self, cadena):
@@ -213,12 +201,9 @@ class Analizador:
         estado, token_type, lexema, cadena = self.crear_lexema(cadena[puntero:])
         puntero = 0
         if lexema and cadena:
-            # if not es_error:
-            #     es_error = True if token_type is None else False
             if not es_error:
                 lex = Token(token_type, lexema, self.fila, self.columna)
                 self.tokens.append(lex)
-            # estado = 7
             self.columna += len(str(lexema))
             puntero = 0
         return estado, cadena, puntero
@@ -229,10 +214,10 @@ class Analizador:
             cadena, puntero = self.limpiar(cadena)
             char = cadena[puntero]
 
-            # self.estado = estado
-            if ord(char) == 43 or ord(char) == 45 or char.isdigit():
+            if ord(char) == 48 or ord(char) == 43 or ord(char) == 45 or char.isdigit():
                 lexema, cadena, es_error = self.crear_numero(cadena)
-                if lexema and cadena:
+
+                if lexema is not None and cadena:
                     self.columna += 1
                     if not es_error:
                         lex = Token(TipoToken.NUMBER, lexema, self.fila, self.columna)

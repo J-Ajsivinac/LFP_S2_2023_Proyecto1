@@ -25,7 +25,7 @@ class App(tk.Tk):
         self.style.configure("TButton1.TButton", foreground="#c2c3c4")
         self.style.configure("TLabel", font=("Montserrat SemiBold", 12))
         self.style.configure("FrameText.TFrame", background="#111111")
-        self.configure(bg="#111111")
+        self.configure(bg="#100f15")
         # style.configure("TText", ))
         self.mainloop()
 
@@ -121,26 +121,6 @@ class Contendio(ttk.Frame):
         btn_2.grid(row=0, column=2, columnspan=1)
         btn_3.grid(row=0, column=3, columnspan=1)
 
-    def cargar_datos(self):
-        self.archivo_actual = lectura.cargar_json(self.text_area)
-        if self.archivo_actual:
-            _, nombre = os.path.split(self.archivo_actual)
-            self.nombre_archivo.config(text=nombre)
-            self.actualizar_contador()
-
-    def analizar_datos(self):
-        texto = self.text_area.get("1.0", "end")
-        # print(texto)
-        if not texto.strip():
-            messagebox.showerror(message="No hay información cargada", title="Error")
-            return None
-        analizar = analizador.Analizador()
-        analizar.leer_instrucciones(texto.lower())
-        # print(analizar.tokens)
-        self.errores = copy.deepcopy(analizar.errores)
-        self.tokens_totales = copy.deepcopy(analizar.tokens)
-        # print(tokens_totales)
-
     def insert_tab(self, event):
         self.text_area.insert(tk.INSERT, "    ")
         return "break"
@@ -160,20 +140,6 @@ class Contendio(ttk.Frame):
 
         tempo = self.text_area.yview()
         self.contador.yview_moveto(tempo[0])
-
-    def actualizar_c(self, event=None):
-        codigo_lineas = self.text_area.get("1.0", "end-1c").split("\n")
-        num_lineas = len(codigo_lineas) + 1
-        self.contador.config(state="normal")
-        self.contador.delete(1.0, "end")
-        for i in range(1, num_lineas):
-            if i == (num_lineas - 1):
-                self.contador.insert("end", f"{i}")
-            else:
-                self.contador.insert("end", f"{i}\n")
-        tempo = self.text_area.yview()
-        self.contador.yview_moveto(tempo[0])
-        self.contador.config(state="disabled")
 
     def sync_scrollbars(self, *args):
         # Cuando se desplaza el scrollbar, se actualizan las posiciones de los widgets Text
@@ -195,9 +161,9 @@ class Contendio(ttk.Frame):
         self.nombre_archivo = tk.Label(
             panel,
             text="Nuevo Documento.json",
-            background="#2b3241",
+            background="#323445",
             font=("Montserrat SemiBold", 11),
-            foreground="#4c95ff",
+            foreground="#979CD1",
         )
         self.nombre_archivo.pack(fill="x")
         self.hscrollbar = ttk.Scrollbar(panel, orient=tk.HORIZONTAL)
@@ -208,6 +174,7 @@ class Contendio(ttk.Frame):
             width=5,
             border=0,
             state="disabled",
+            background="#28272f",
             yscrollcommand=self.vscrollbar.set,
         )
         # self.contador.configure(state="normal")
@@ -227,8 +194,9 @@ class Contendio(ttk.Frame):
             font=("Cascadia Code", 12),
             yscrollcommand=self.vscrollbar.set,
             xscrollcommand=self.hscrollbar.set,
-            background="#232323",
+            background="#222127",
             border=0,
+            wrap="none",
         )
         self.text_area.bind("<Tab>", self.insert_tab)
         self.text_area.tag_configure("tab", tabs=("2c",))
@@ -245,6 +213,26 @@ class Contendio(ttk.Frame):
         self.text_area.bind("<KeyRelease>", self.actualizar_contador)
         # self.text_area.bind("<BackSpace>", self.actualizar_c)
         self.actualizar_contador(None)
+
+    def cargar_datos(self):
+        self.archivo_actual = lectura.cargar_json(self.text_area)
+        if self.archivo_actual:
+            _, nombre = os.path.split(self.archivo_actual)
+            self.nombre_archivo.config(text=nombre)
+            self.actualizar_contador()
+
+    def analizar_datos(self):
+        texto = self.text_area.get("1.0", "end")
+        # print(texto)
+        if not texto.strip():
+            messagebox.showerror(message="No hay información cargada", title="Error")
+            return None
+        analizar = analizador.Analizador()
+        analizar.leer_instrucciones(texto.lower())
+        # print(analizar.tokens)
+        self.errores = copy.deepcopy(analizar.errores)
+        self.tokens_totales = copy.deepcopy(analizar.tokens)
+        # print(tokens_totales)
 
     def crear_archivo_error(self):
         if self.tokens_totales:
@@ -263,6 +251,8 @@ class Contendio(ttk.Frame):
             json_data = json.dumps(json_error, indent=4, ensure_ascii=False)
             with open("errores.json", "w", encoding="utf-8") as json_file:
                 json_file.write(json_data)
+            os.system("start errores.json")
+            # messagebox.showinfo(message="Archivo de errores Creado", title="Éxito")
         else:
             messagebox.showerror(message="No hay datos analizados", title="Error")
 

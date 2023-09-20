@@ -2,6 +2,7 @@ from modules.Abstract.token import Token, TipoToken
 from modules.graph import Graph
 import math
 import copy
+from tkinter import ttk, messagebox
 
 
 class Instrucciones:
@@ -19,7 +20,6 @@ class Instrucciones:
     def operar(self, indice=0, recursivo=False):
         valores = []
         op = None
-        cabeza = ""
         # self.i = indice + 1
         ind = indice
         while self.tokens:
@@ -38,7 +38,6 @@ class Instrucciones:
                 TipoToken.O_MOD,
             ]:
                 op = lexema
-                cabeza = f"{op.valor}_{0}_{ind}"
                 break
             elif lexema.tipo in [
                 TipoToken.PALABRA_CLAVE_FONDO,
@@ -78,8 +77,20 @@ class Instrucciones:
                     valores.append(self.operar(ind + 1, True))
                 else:
                     if valor.tipo == TipoToken.NUMBER:
-                        self.temp.append(valor.valor)
-                        valores.append(valor.valor)
+                        if (
+                            op.tipo == TipoToken.O_DIVISION
+                            and len(valores) >= 1
+                            and valor.valor == 0
+                        ):
+                            self.temp.append(1)
+                            valores.append(1)
+                            messagebox.showerror(
+                                message="División por 0 no aceptada\nValor por defecto = 1",
+                                title="Error",
+                            )
+                        else:
+                            self.temp.append(valor.valor)
+                            valores.append(valor.valor)
 
             if lexema.tipo in [TipoToken.LLAVE_DER]:
                 self.temp.append(lexema.valor)
@@ -105,8 +116,7 @@ class Instrucciones:
                 result *= valor
             regresar = result
         elif op.tipo == TipoToken.O_DIVISION:
-            result = valores[0] / valores[1]
-            regresar = result
+            regresar = valores[0] / valores[1]
         elif op.tipo == TipoToken.O_POTENCIA:
             regresar = math.pow(valores[0], valores[1])
         elif op.tipo == TipoToken.O_RAIZ:
@@ -139,10 +149,7 @@ class Instrucciones:
             else:
                 break
             self.temp.clear()
-        # for i in self.instrucciones:
-        #     print(i, "------")
         self.llamar_grafica()
-        # print(self.configuraciones)
 
     def llamar_grafica(self):
         grafica = Graph(self.configuraciones, self.instrucciones)
