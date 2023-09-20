@@ -66,9 +66,7 @@ class Contendio(ttk.Frame):
         menu_button = ttk.Menubutton(
             panel_superior, text="", image=self.img_home, compound="left", width=1
         )
-        # menu_button.configure(borderwidth=0)
 
-        # menu_button["borderwidth"] = 0
         button_sub_menu = tk.Menu(
             menu_button,
             tearoff=False,
@@ -76,7 +74,6 @@ class Contendio(ttk.Frame):
             font=("Montserrat", 12),
             borderwidth=20,
         )
-        # button_sub_menu["borderwidth"] = 0
         button_sub_menu.add_command(label="  Abrir", command=self.cargar_datos)
         button_sub_menu.add_command(label="  Guardar", command=self.guardar)
         button_sub_menu.add_command(label="  Guardar Como", command=self.guardar_como)
@@ -142,7 +139,6 @@ class Contendio(ttk.Frame):
         self.contador.yview_moveto(tempo[0])
 
     def sync_scrollbars(self, *args):
-        # Cuando se desplaza el scrollbar, se actualizan las posiciones de los widgets Text
         self.text_area.yview(*args)
         self.contador.yview(*args)
 
@@ -150,7 +146,6 @@ class Contendio(ttk.Frame):
         return "break"
 
     def sync_text_widgets(self, *args):
-        # Cuando se desplaza uno de los widgets Text, se actualiza la posición del scrollbar y del otro widget Text
         self.contador.yview_moveto(args[0])
         self.vscrollbar.set(*args)
 
@@ -177,16 +172,9 @@ class Contendio(ttk.Frame):
             background="#28272f",
             yscrollcommand=self.vscrollbar.set,
         )
-        # self.contador.configure(state="normal")
-        # self.contador.insert("1.0", "1")
-        # self.contador.configure(state="disabled")
 
-        self.contador.bind(
-            "<MouseWheel>", self.bloquear_scroll
-        )  # Bloquea el desplazamiento con la rueda del ratón
-        self.contador.bind(
-            "<Up>", self.bloquear_scroll
-        )  # Bloquea el desplazamiento hacia arriba con la tecla flecha arriba
+        self.contador.bind("<MouseWheel>", self.bloquear_scroll)
+        self.contador.bind("<Up>", self.bloquear_scroll)
         self.contador.bind("<Down>", self.bloquear_scroll)
 
         self.text_area = tk.Text(
@@ -206,12 +194,10 @@ class Contendio(ttk.Frame):
 
         self.vscrollbar.config(command=self.sync_scrollbars)
         self.text_area.config(yscrollcommand=self.sync_text_widgets)
-        # self.contador.config(yscrollcommand=self.sync_text_widgets)
 
         self.vscrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.text_area.pack(expand=True, fill="both")
         self.text_area.bind("<KeyRelease>", self.actualizar_contador)
-        # self.text_area.bind("<BackSpace>", self.actualizar_c)
         self.actualizar_contador(None)
 
     def cargar_datos(self):
@@ -223,7 +209,6 @@ class Contendio(ttk.Frame):
 
     def analizar_datos(self):
         texto = self.text_area.get("1.0", "end")
-        # print(texto)
         if not texto.strip():
             messagebox.showerror(message="No hay información cargada", title="Error")
             return None
@@ -232,7 +217,6 @@ class Contendio(ttk.Frame):
         # print(analizar.tokens)
         self.errores = copy.deepcopy(analizar.errores)
         self.tokens_totales = copy.deepcopy(analizar.tokens)
-        # print(tokens_totales)
 
     def crear_archivo_error(self):
         if self.tokens_totales:
@@ -252,7 +236,6 @@ class Contendio(ttk.Frame):
             with open("errores.json", "w", encoding="utf-8") as json_file:
                 json_file.write(json_data)
             os.system("start errores.json")
-            # messagebox.showinfo(message="Archivo de errores Creado", title="Éxito")
         else:
             messagebox.showerror(message="No hay datos analizados", title="Error")
 
