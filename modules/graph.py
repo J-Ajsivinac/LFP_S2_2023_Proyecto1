@@ -38,6 +38,7 @@ class Graph:
             },
             format="svg",
         )
+        self.dot.attr(label=f"{self.nombre}", labelloc="t", labeljust="c")
         self.i = 0
         self.contador_n = 0
         self.ultimo = None
@@ -54,6 +55,7 @@ class Graph:
     def genera_operaciones(self):
         for ins in self.instrucciones:
             with self.dot.subgraph(name=f"cluster_{self.i}") as c:
+                c.attr(label="", labelloc="t", labeljust="c")
                 # print(ins)
                 c.attr(color="#424242")
                 self.contador_n = 0

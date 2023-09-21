@@ -241,7 +241,7 @@ class Contendio(ttk.Frame):
 
     def crear_reporte(self):
         if self.tokens_totales:
-            i = instrucciones.Instrucciones(self.tokens_totales)
+            i = instrucciones.Instrucciones(copy.deepcopy(self.tokens_totales))
             i.iniciar()
         else:
             messagebox.showerror(message="No hay datos analizados", title="Error")

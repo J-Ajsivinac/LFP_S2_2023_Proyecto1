@@ -19,9 +19,9 @@ class Ventana2:
 
     def crear_contenido(self):
         titulo = ttk.Label(self.ventana, text="Reporte de Tokens", background="#111111")
-        titulo.pack(fill="x", side="top", pady=10, padx=30)
+        titulo.pack(fill="x", side="top", pady=8, padx=30)
         panel = ttk.Frame(self.ventana)
-        panel.pack(padx=30, pady=5, fill="both", expand=True)
+        panel.pack(padx=30, pady=2, fill="both", expand=True)
         panel.configure(style="Frame1.TFrame")
         self.vscrollbar = ttk.Scrollbar(panel, orient=tk.VERTICAL)
         self.tabla = ttk.Treeview(
@@ -36,8 +36,8 @@ class Ventana2:
         self.tabla.heading("Tipo", text="Tipo")
         # self.tabla.configure(y_scrollbar=self.vscrollbar.set)
         self.vscrollbar.config(command=self.tabla.yview)
-        self.vscrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=7)
-        self.tabla.pack(fill="both", expand=True, pady=7)
+        self.vscrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=12)
+        self.tabla.pack(fill="both", expand=True, pady=12)
         self.agregar_datos()
 
     def agregar_datos(self):
