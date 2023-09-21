@@ -218,6 +218,47 @@ para poder cargar el nuevo contenido dentro de ese archivo.
 </blockquote>
 <br>
 
+<h3>Clase Ventana2</h3>
+En su constructor recibe una lista con los elementos reconocidos, para poder mostrarlos a los usuarios
+
+<blockquote>
+
+**Método crear_contenido**
+
+```python
+def crear_contenido(self):
+```
+Se encarga de crear los elementos visuales, en este caso solamente se, encarga de crear un label, un panel que dentro contendra una tabla en la cual se podra ver los elementos reconocidos, a la tabla es necesario definirle las cabeceras en este caso las cabeceras que se usan son : `Lexema`, `Fila`, `Columna`, `Tipo`.
+
+</blockquote> 
+<br>
+
+<blockquote>
+
+**Método agregar_datos**
+
+```python
+def crear_contenido(self):
+```
+Itera entre todos los elementos encontrados para poder agregarlo a la tabla. Se hace uso de el método `mostrar_tipo` para poder dar un mensaje más entendible al usuario del tipo de elemento encontrado
+
+</blockquote> 
+<br>
+
+<blockquote>
+
+**Método mostrar_tipo**
+
+```python
+def mostrar_tipo(self, tipo_buscar):
+```
+Recibe como parametro el tipo de elemento buscado y usando un diccionario con las llaves y los mensajes que se deben mostrar retorna una cadena de texto que se mostrará al usuario para que sea más comprensible.
+
+</blockquote> 
+<br>
+
+
+
 <h3>Función para cargar el Json</h3>
 
 ```Python
