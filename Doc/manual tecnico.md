@@ -443,8 +443,11 @@ git clone https://github.com/J-Ajsivinac/LFP_S2_2023_Practica_202200135
 ```
 
 ## 📷 Capturas
-![Captura 1](/img/menu.png)
-<p align="center">Menú principal</p>
+![Captura 1](https://i.imgur.com/tZcn97A.png)
+<p align="center">Ventana Principal</p>
 
-![Captura 2](/img/reportes.png)
-<p align="center">Informe generado</p>
+![Captura 2](https://i.imgur.com/hPtFdYR.png)
+<p align="center">Informe de Tokens encontrados</p>
+
+![Captura 3](https://i.imgur.com/RbjhXve.png)
+<p align="center">Gráfica Generada</p>
