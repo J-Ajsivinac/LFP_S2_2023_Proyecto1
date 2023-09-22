@@ -233,9 +233,9 @@ class Contendio(ttk.Frame):
                 }
                 json_error["errores"].append(error_dict)
             json_data = json.dumps(json_error, indent=4, ensure_ascii=False)
-            with open("errores.json", "w", encoding="utf-8") as json_file:
+            with open("RESULTADOS_202200135.json", "w", encoding="utf-8") as json_file:
                 json_file.write(json_data)
-            os.system("start errores.json")
+            os.system("start RESULTADOS_202200135.json")
         else:
             messagebox.showerror(message="No hay datos analizados", title="Error")
 
