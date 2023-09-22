@@ -373,9 +373,9 @@ punto para indicar los decimales se retorna un valor entero
 
 <blockquote>
 
-**AFD**
+**Estados**
 
-![AFD](https://i.imgur.com/hY82WFp.png)
+El estado s_0 es el estado inicial que determina que estado es el siguiente. El estado s_1 determina si el caracter es una corchete de apertura, el estado s_2 determina si el caracter son dos puntos, el estado s_3 determina si el caracter es una llave de apertura, el estado s_4 determina si el caracter es una comilla, el estado s_5 crea las palabras que están entre comillas, el estado s_6 determina si el caracter es un llave de cerradura, el estado s_7 determina si el caracter es una coma, el estado s_8 determina si el caracter es un corchete de cierre, el estado s_9 crea los números, tomando en cuenta su signo
 </blockquote>
 <br>
 

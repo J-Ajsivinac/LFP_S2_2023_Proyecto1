@@ -77,8 +77,18 @@ class Instrucciones:
                     valores.append(self.operar(ind + 1, True))
                 else:
                     if valor.tipo == TipoToken.NUMBER:
-                        self.temp.append(valor.valor)
-                        valores.append(valor.valor)
+                        if op.tipo in [
+                            TipoToken.O_SENO,
+                            TipoToken.O_COSENO,
+                            TipoToken.O_TANGENTE,
+                            TipoToken.O_INVERSO,
+                        ]:
+                            if len(valores) == 0:
+                                self.temp.append(valor.valor)
+                                valores.append(valor.valor)
+                        else:
+                            self.temp.append(valor.valor)
+                            valores.append(valor.valor)
 
             if lexema.tipo in [TipoToken.LLAVE_DER]:
                 self.temp.append(lexema.valor)

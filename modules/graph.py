@@ -57,10 +57,9 @@ class Graph:
             with self.dot.subgraph(name=f"cluster_{self.i}") as c:
                 c.attr(label="", labelloc="t", labeljust="c")
                 # print(ins)
-                c.attr(color="#424242")
+                c.attr(color="#ffffff")
                 self.contador_n = 0
                 self.crear_nodos(0, c, ins)
-                # print(ins)
                 self.i += 1
         self.dot.format = "svg"
         self.dot.render(f"resultados/{self.nombre}", view=True)
@@ -76,14 +75,20 @@ class Graph:
                 cabeza = f"{self.i}_{i}_{self.contador_n}"
                 if anterior:
                     c.edge(anterior, f"{self.i}_{i}_{self.contador_n}")
+                if not anterior and self.ultimo:
+                    self.dot.edge(self.ultimo, cabeza, style="invis")
+                    self.ultimo = None
                 self.contador_n += 1
-
             elif valor == "[":
                 ins = self.crear_nodos(i + 1, c, ins[ind + 1 :], cabeza)
                 ind = 0
             elif isinstance(valor, (int, float)):
                 c.node(f"{self.i}_{i}_{self.contador_n}", label=f"{valor}")
                 c.edge(cabeza, f"{self.i}_{i}_{self.contador_n}")
+                if not self.ultimo:
+                    self.ultimo = f"{self.i}_{i}_{self.contador_n}"
+                if int(self.ultimo.split("_")[1]) < i:
+                    self.ultimo = f"{self.i}_{i}_{self.contador_n}"
                 self.contador_n += 1
             elif valor in ["]"]:
                 return ins[ind:]

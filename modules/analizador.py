@@ -85,11 +85,8 @@ class Analizador:
         self.abierto = False if self.abierto else True
 
     def s_5(self, cadena, puntero):
-        estado, cadena, puntero = self.crear_objeto(cadena, puntero)
-        if estado:
-            self.estado = estado
-        else:
-            self.estado = 0
+        _, cadena, puntero = self.crear_objeto(cadena, puntero)
+        self.estado = 0
         return cadena
 
     def s_6(self):
