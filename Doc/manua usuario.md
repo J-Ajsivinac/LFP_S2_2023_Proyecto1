@@ -138,7 +138,7 @@ El formato del archivo de salida es el siguiente:
 
 Con el botón Reporte se genera un grafico con las operaciones que están dentro del cuadro de texto, el gráfico que se genera es similar al siguiente (Varia según las operaciones que se les agregue):
 
-![Captura 5](https://i.imgur.com/RbjhXve.png)
+![Captura 5](https://i.imgur.com/FBkikAX.png)
 
 Es importante definir las configuraciones iniciales dentro del cuadro de texto, para poder visualizar de forma personalizada la gráfica (se dará más información del contenido que debe estar ingresado en el cuadro de texto en el siguiente apartado)
 ### Parte inferior

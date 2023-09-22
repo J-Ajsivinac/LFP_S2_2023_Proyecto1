@@ -490,5 +490,5 @@ git clone https://github.com/J-Ajsivinac/LFP_S2_2023_Practica_202200135
 ![Captura 2](https://i.imgur.com/hPtFdYR.png)
 <p align="center">Informe de Tokens encontrados</p>
 
-![Captura 3](https://i.imgur.com/RbjhXve.png)
+![Captura 3](https://i.imgur.com/FBkikAX.png)
 <p align="center">Gráfica Generada</p>
