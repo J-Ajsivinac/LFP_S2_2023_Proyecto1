@@ -11,10 +11,15 @@ class Ventana2:
         self.ventana.title("Resultados")
         self.ventana.geometry("900x550")
         self.ventana.resizable(0, 0)
-        self.ventana.configure(bg="#111111")
+        # self.ventana.configure(bg="#111111")
         s = ttk.Style()
-        s.configure("Frame1.TFrame", background="#111111")
+        self.ventana.configure(bg="#100f15")
+        s.configure("Frame1.TFrame", background="#100f15")
         sv_ttk.set_theme("dark")
+        self.style = ttk.Style()
+        self.style.configure("Treeview", background="#222127")
+        self.style.configure("Treeview", font=("Montserrat SemiBold", "11"))
+        self.style.configure("Treeview.Heading", font=("Montserrat SemiBold", "12"))
         self.crear_contenido()
 
     def crear_contenido(self):

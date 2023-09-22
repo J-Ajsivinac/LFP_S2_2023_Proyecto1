@@ -77,20 +77,8 @@ class Instrucciones:
                     valores.append(self.operar(ind + 1, True))
                 else:
                     if valor.tipo == TipoToken.NUMBER:
-                        if (
-                            op.tipo == TipoToken.O_DIVISION
-                            and len(valores) >= 1
-                            and valor.valor == 0
-                        ):
-                            self.temp.append(1)
-                            valores.append(1)
-                            messagebox.showerror(
-                                message="División por 0 no aceptada\nValor por defecto = 1",
-                                title="Error",
-                            )
-                        else:
-                            self.temp.append(valor.valor)
-                            valores.append(valor.valor)
+                        self.temp.append(valor.valor)
+                        valores.append(valor.valor)
 
             if lexema.tipo in [TipoToken.LLAVE_DER]:
                 self.temp.append(lexema.valor)
@@ -116,13 +104,37 @@ class Instrucciones:
                 result *= valor
             regresar = result
         elif op.tipo == TipoToken.O_DIVISION:
-            regresar = valores[0] / valores[1]
+            if valores[1] != 0:
+                regresar = valores[0] / valores[1]
+            else:
+                regresar = valores[0] / 1
+                messagebox.showerror(
+                    message="División por 0 no aceptada\nValor por defecto = 1",
+                    title="Error",
+                )
+
         elif op.tipo == TipoToken.O_POTENCIA:
             regresar = math.pow(valores[0], valores[1])
         elif op.tipo == TipoToken.O_RAIZ:
-            regresar = math.pow(valores[0], 0.5)
+            if valores[1] != 0:
+                regresar = math.pow(valores[0], 1 / valores[1])
+            else:
+                regresar = math.pow(valores[0], 1)
+                messagebox.showerror(
+                    message="División por 0 no aceptada\nValor por defecto = 1",
+                    title="Error",
+                )
+
         elif op.tipo == TipoToken.O_INVERSO:
-            regresar = 1 / valores[0]
+            if valores[0] != 0:
+                regresar = 1 / valores[0]
+            else:
+                messagebox.showerror(
+                    message="División por 0 no aceptada\nValor por defecto = 1",
+                    title="Error",
+                )
+
+                regresar = 1
         elif op.tipo == TipoToken.O_SENO:
             regresar = math.sin(math.radians(valores[0]))
         elif op.tipo == TipoToken.O_COSENO:

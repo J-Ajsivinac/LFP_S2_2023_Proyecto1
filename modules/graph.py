@@ -76,18 +76,14 @@ class Graph:
                 cabeza = f"{self.i}_{i}_{self.contador_n}"
                 if anterior:
                     c.edge(anterior, f"{self.i}_{i}_{self.contador_n}")
-                    # print(valor, anterior, f"{self.i}_{i}_{self.contador_n}")
                 self.contador_n += 1
 
             elif valor == "[":
                 ins = self.crear_nodos(i + 1, c, ins[ind + 1 :], cabeza)
                 ind = 0
-                # print(f"---{cabeza}---")
             elif isinstance(valor, (int, float)):
                 c.node(f"{self.i}_{i}_{self.contador_n}", label=f"{valor}")
-                # print(f"{valor}")
                 c.edge(cabeza, f"{self.i}_{i}_{self.contador_n}")
-                # self.ultimo = f"{self.i}_{i}_{self.contador_n}"
                 self.contador_n += 1
             elif valor in ["]"]:
                 return ins[ind:]
