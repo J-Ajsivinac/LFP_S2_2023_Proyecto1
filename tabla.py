@@ -48,7 +48,11 @@ class Ventana2:
     def agregar_datos(self):
         for i, dato in enumerate(self.datos):
             valor = dato.valor
-            tipo = self.mostrar_tipo(dato.tipo)
+            tipo = None
+            if dato.tipo == TipoToken.STRING and valor.startswith("v"):
+                tipo = "Palabra reservada Valor"
+            else:
+                tipo = self.mostrar_tipo(dato.tipo)
             fila = dato.fila
             columna = dato.columna
             agregar = (valor, fila, columna, tipo)

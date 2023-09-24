@@ -106,7 +106,7 @@ class Analizador:
 
     def s_9(self, cadena, puntero):
         cadena, puntero = self.dos_valores(cadena, puntero)
-        self.columna += 1
+        # self.columna += 1
         self.estado = 0
         return cadena
 
@@ -215,11 +215,11 @@ class Analizador:
                 lexema, cadena, es_error = self.crear_numero(cadena)
 
                 if lexema is not None and cadena:
-                    self.columna += 1
+                    # self.columna += 1
                     if not es_error:
                         lex = Token(TipoToken.NUMBER, lexema, self.fila, self.columna)
                         self.tokens.append(lex)
-                    self.columna += len(str(lexema)) + 1
+                    self.columna += len(str(lexema))
                     puntero = 0
                 break
 

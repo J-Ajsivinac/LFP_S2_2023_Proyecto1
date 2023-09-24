@@ -8,15 +8,6 @@ class Token(Expression):
         self.tipo = tipo
         self.valor = valor
 
-    def operar(self, arbol):
-        return self.valor
-
-    def getColumna(self):
-        return super().getColumna()
-
-    def getFila(self):
-        return super().getFila()
-
 
 class TipoToken(Enum):
     CORCHETE_IZQ = 1
