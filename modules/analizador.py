@@ -239,7 +239,7 @@ class Analizador:
                 or char == "\n"
                 or char == "\t"
                 or char == ","
-                or (not char.isdigit() and char != ".")
+                or (char != ".")
             ):
                 if es_decimal:
                     return float(numero), cadena[puntero - 1 :], es_error

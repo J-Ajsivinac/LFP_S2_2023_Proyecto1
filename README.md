@@ -12,3 +12,7 @@
 </div>
 <div align="center"> 🏛 Universidad San Carlos de Guatemala</div>
 <div align="center"> 📆 Segundo Semestre 2023</div>
+
+<a href="https://github.com/J-Ajsivinac/LFP_S2_2023_Proyecto1_202200135/blob/main/Doc/manua%20usuario.md">Manual de Usuario</a>
+
+<a href="https://github.com/J-Ajsivinac/LFP_S2_2023_Proyecto1_202200135/blob/main/Doc/manual%20tecnico.mdd">Manual Técnico</a>
